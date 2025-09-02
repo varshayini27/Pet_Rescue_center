@@ -40,7 +40,7 @@ export default function Login() {
 
     try {
       console.log({ data });
-      const response = await Http.post('api/auth/login', data);
+      const response = await Http.post('auth/login', data);
       const responseData = response?.data?.data;
       console.log({ responseData })
       console.log(responseData.role)

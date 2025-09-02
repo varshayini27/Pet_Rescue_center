@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import Navbar from "../../../Components/NavBar";
 import Footer from "../../Home/Components/Footer";
 import { Box, Typography, Card, CardContent, CardMedia, Divider, Stack, Button } from "@mui/material";
+import { fetchRescueCenters } from "../../../Services/fetch";
+import { useDispatch, useSelector } from "react-redux";
+import type { ReduxState } from "../../../Components/types/redux";
 
 const rescueStories = [
   {
@@ -103,6 +107,15 @@ export const  rescueCenters = [
 ];
 
 export default function AboutUs() {
+  const dispatch = useDispatch();
+  // const { rescueCenters } = useSelector((state: ReduxState) => state.rescueCenter);
+
+
+  
+useEffect(() => {
+  fetchRescueCenters(dispatch)
+}, []);
+
   return (
     <>
       <Navbar />

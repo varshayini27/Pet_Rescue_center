@@ -63,7 +63,7 @@ const UserRegister: React.FC = () => {
     const { confirm_password, ...dataToSend } = data;
 
     try {
-      const response = await Http.post(`/api/auth/register/adopter`, dataToSend);
+      const response = await Http.post(`/auth/register/adopter`, dataToSend);
       const responseData = response?.data?.data;
 
       const token = responseData?.token;

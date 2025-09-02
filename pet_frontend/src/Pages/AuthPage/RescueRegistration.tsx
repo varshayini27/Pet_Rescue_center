@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import {
@@ -17,6 +17,7 @@ import { handleCancel } from '../../Services/service';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setAuth } from '../../redux/authSlice';
+import { uploadImage } from '../../Services/ImageUpload';
 
 interface RescueCenterFormInputs {
   name: string;
@@ -28,6 +29,7 @@ interface RescueCenterFormInputs {
   province: string;
   password: string;
   confirm_password: string;
+  images: FileList;
 }
 
 interface Location {
@@ -36,11 +38,20 @@ interface Location {
 }
 
 const RescueCenterRegister: React.FC = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<RescueCenterFormInputs>();
+  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm<RescueCenterFormInputs>();
   const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+      setPreview(URL.createObjectURL(e.target.files[0]));
+    }
+  };
 
   const getLocation = () => {
     if (!navigator.geolocation) {
@@ -69,37 +80,41 @@ const RescueCenterRegister: React.FC = () => {
       return;
     }
     const { confirm_password, ...dataToSend } = data;
-
-
+    let image_url: string | null = null;
+    if (image) {
+      image_url = await uploadImage(image); // Upload to Supabase and get URL
+    }
     const payload = {
       ...dataToSend,
+      image_url: image_url,
       latitude: location.latitude,
       longitude: location.longitude
     };
+    console.log({ payload });
 
-    try {
-      const response = await Http.post(`api/auth/register/rescuecenter`, payload);
-      const responseData = response?.data?.data
-      const token = responseData?.token;
-      if (token) {
-        localStorage.setItem('token', token);
-        localStorage.setItem('isLoggedIn', 'true');
-        dispatch(setAuth({
-          token: token,
-          role: responseData.role
-        }));
-        showToastSuccess1(response.data.message || "Registration successful!");
-        navigate('/');
+    // try {
+    //   const response = await Http.post(`api/auth/register/rescuecenter`, payload);
+    //   const responseData = response?.data?.data
+    //   const token = responseData?.token;
+    //   if (token) {
+    //     localStorage.setItem('token', token);
+    //     localStorage.setItem('isLoggedIn', 'true');
+    //     dispatch(setAuth({
+    //       token: token,
+    //       role: responseData.role
+    //     }));
+    //     showToastSuccess1(response.data.message || "Registration successful!");
+    //     navigate('/');
 
-      }
-      dispatch(setAuth({
-        token: token,
-        role: responseData.role
-      }));
-    } catch (error) {
-      console.error(error);
-      showToastError("Registration failed. Please try again.");
-    }
+    //   }
+    //   dispatch(setAuth({
+    //     token: token,
+    //     role: responseData.role
+    //   }));
+    // } catch (error) {
+    //   console.error(error);
+    //   showToastError("Registration failed. Please try again.");
+    // }
   };
 
   return (
@@ -228,6 +243,38 @@ const RescueCenterRegister: React.FC = () => {
               error={!!errors.confirm_password}
               helperText={errors.confirm_password?.message}
             />
+            <Box sx={{ my: 2 }}>
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{
+                  color: '#084C11',
+                  borderColor: '#084C11',
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  px: 3
+                }}
+              >
+                Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleFileChange}
+                />
+              </Button>
+
+              {preview && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2">Image Preview:</Typography>
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }}
+                  />
+                </Box>
+              )}
+            </Box>
 
             <Box sx={{ my: 2, textAlign: "center" }}>
               <Button

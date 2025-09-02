@@ -3,7 +3,6 @@ import {
   Card, CardContent, CardMedia, Button, Typography,
   Box, CircularProgress, CardActions
 } from '@mui/material';
-import axios from 'axios';
 import PetDetailDialog from './PetDetailCard';
 import type { IPet } from '../../../Components/types/Pets';
 import { dummyPets } from '../../RescueCeter/ManagePets/View/ManagePetsview';
