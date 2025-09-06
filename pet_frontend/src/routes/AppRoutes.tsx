@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
 import DefaultLayout from '../Layout/DefaultLayout';
-import AddPetProfile from '../Pages/RescueCeter/AddPetProfile';
 import RegisterChoicePage from '../Pages/AuthPage/Signin';
 import AdoptionRequestPage from '../Pages/RescueCeter/Adoption_Request/RequestPage';
 import RescueCenterRegister from '../Pages/AuthPage/RescueRegistration';
@@ -9,7 +8,6 @@ import UserRegister from '../Pages/AuthPage/UserRegistrationForm';
 import Home from '../Pages/Home/View/Home';
 import PetProfiles from '../Pages/Home/Components/PetProfile';
 import DonationPage from '../Pages/General/Donation/View/Donationpageview';
-import DonationDetailPage from '../Pages/General/Donation/Component/DonationForm';
 import Login from '../Pages/AuthPage/Login';
 import ReportView from '../Pages/Report/View/ReportView';
 import PetTable from '../Pages/RescueCeter/ManagePets/View/ManagePetsview';
@@ -18,6 +16,7 @@ import Dashboard from '../Pages/Dashboard/View/Dashboard';
 import AboutUs from '../Pages/AboutUs/View/aboutUs';
 import DonationRecord from '../Pages/RescueCeter/DonationRecord/View/DonationRecord';
 import ContactUs from '../Pages/ContactUs/View/ContactUs';
+import RescueCenterDetailPage from '../Pages/General/Donation/Component/DonationForm';
 
 const AppRoutes = () => {
   return (
@@ -28,7 +27,6 @@ const AppRoutes = () => {
       <Route path="/PetProfile" element={<PetProfiles />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/center/dashboard" element={<DefaultLayout><Dashboard /></DefaultLayout>} />
-      <Route path="/center/addpet" element={<DefaultLayout><AddPetProfile /></DefaultLayout>} />
       <Route path="/center/managepet" element={<DefaultLayout><PetTable /></DefaultLayout>} />
       <Route path="/center/requests" element={<DefaultLayout>< AdoptionRequestPage /></DefaultLayout>} />
       <Route path="/center/donation_record" element={<DefaultLayout><DonationRecord /></DefaultLayout>} />
@@ -38,7 +36,7 @@ const AppRoutes = () => {
       <Route path="/report" element={<ReportView />} />
       <Route path="/contact_us" element={<ContactUs />} />
       <Route path="/donation" element={<DonationPage />} />
-      <Route path="/donation/:id" element={<DonationDetailPage />} />
+      <Route path="/donation/:centerId" element={<RescueCenterDetailPage />} />
 
       {/* <Route path="/rescue-centers" element={<DefaultLayout><RescueCenters /></DefaultLayout>} />
       <Route path="/adoptions" element={<DefaultLayout><Adoptions /></DefaultLayout>} />

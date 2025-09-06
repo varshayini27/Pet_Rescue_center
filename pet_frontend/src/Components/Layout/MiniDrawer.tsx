@@ -183,10 +183,6 @@ export default function MiniDrawer({ children }: { children: React.ReactNode }) 
                 <ListItemIcon><DashboardIcon /></ListItemIcon>
                 <ListItemText primary="Dashboard" />
               </ListItem>
-              <ListItem button key="AddPet" component={RouterLink as React.ElementType} to="/center/addpet">
-                <ListItemIcon><AddCircleIcon /></ListItemIcon>
-                <ListItemText primary="Add Pet" />
-              </ListItem>
               <ListItem button key="MyPets" component={RouterLink as React.ElementType} to="/center/managepet">
                 <ListItemIcon><PetsIcon /></ListItemIcon>
                 <ListItemText primary="Manage Pets" />

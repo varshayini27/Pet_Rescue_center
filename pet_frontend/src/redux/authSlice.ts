@@ -4,6 +4,7 @@ import type { IRescueCenter } from "../Components/types/RescueCenter";
 
 export interface AuthState {
     rescueCenter:IRescueCenter | null
+    rescueCenterId: string | null,
     token: string | null,
     role: string | null,
     [key: string]: number | null | string | object | any;
@@ -11,6 +12,7 @@ export interface AuthState {
 
 const initialState: AuthState = {
     rescueCenter: null,
+    rescueCenterId: null,
     token: null,
     role: null,
 };
@@ -20,7 +22,8 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         setAuth(state, action) {
-            const { rescueCenter, token, role } = action.payload;
+            const { rescueCenter,rescueCenterId, token, role } = action.payload;
+            state.rescueCenterId = rescueCenterId;
             state.rescueCenter = rescueCenter;
             state.token = token;
             state.role= role;

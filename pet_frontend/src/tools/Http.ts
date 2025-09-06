@@ -11,7 +11,6 @@ const Http = axios.create({
 })
 let requestCount = 0;
 Http.interceptors.request.use(async (config) => {
-
     requestCount++;
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 500));

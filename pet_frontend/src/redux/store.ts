@@ -3,6 +3,7 @@ import storage from "redux-persist/lib/storage";
 import { FLUSH, PAUSE, PERSIST, persistCombineReducers, persistStore, PURGE, REGISTER, REHYDRATE } from "redux-persist";
 import {authSlice} from "./authSlice";
 import { rescueCenterSlice } from "./rescueCenterSlice";
+import { petSlice } from "./petSlice";
 
 
 const persistConfig = {
@@ -13,6 +14,7 @@ const persistConfig = {
 const persistedReducer = persistCombineReducers(persistConfig, {
      auth: authSlice.reducer,
      rescueCenter: rescueCenterSlice.reducer,
+     pet: petSlice.reducer,
 }); 
 
 const store = configureStore({

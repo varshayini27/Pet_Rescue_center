@@ -53,7 +53,8 @@ export default function Login() {
           dispatch(setAuth({
             token: token,
             role: responseData.role,
-            rescueCenter: responseData?.rescueCenter
+            rescueCenter: responseData?.rescueCenter,
+            rescueCenterId: responseData?.rescueCenter?.center_id
           }));
           // dispatch(setRescueCenter({
           //   rescueCenter: responseData.rescueCenter

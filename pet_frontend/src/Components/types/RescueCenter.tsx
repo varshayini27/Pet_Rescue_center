@@ -1,7 +1,7 @@
 import type { IPet } from "./Pets";
 
 export interface IRescueCenter {
-  center_id: number;
+  center_id: string;
   name: string;
   email: string;
   phone_no: string;
@@ -12,6 +12,7 @@ export interface IRescueCenter {
   latitude: number;
   longitude: number;
   image_url?: string;
+  history?: string;
   registeredAt?: string;
-  pet: IPet[];
+  pets: IPet[];
 }

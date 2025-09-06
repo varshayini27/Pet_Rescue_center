@@ -5,34 +5,28 @@ import {
 } from '@mui/material';
 import PetDetailDialog from './PetDetailCard';
 import type { IPet } from '../../../Components/types/Pets';
-import { dummyPets } from '../../RescueCeter/ManagePets/View/ManagePetsview';
+import type { ReduxState } from '../../../Components/types/redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllPets } from '../../../Services/fetch';
 
 
 
 
 const PetProfiles: React.FC = () => {
-  const [pets, setPets] = useState<IPet[]>([]);
-  // const [loading, setLoading] = useState(true);
+  const { pets } = useSelector((state: ReduxState) => state.pet);
+  const dispatch = useDispatch()
   const [selectedPet, setSelectedPet] = useState<IPet | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // useEffect(() => {
-  //   axios.get('http://localhost:5000/api/Pet') // update with your API
-  //     .then(response => {
-  //       setPets(response.data);
-  //       setLoading(false);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching pets:', error);
-  //       setLoading(false);
-  //     });
-  // }, []);
+  useEffect(() => {
+    fetchAllPets(dispatch)
+  }, [dispatch])
 
   const handleOpenDialog = (pet: IPet) => {
     setSelectedPet(pet);
     setDialogOpen(true);
   };
-
+console.log({pets})
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setSelectedPet(null);
@@ -42,10 +36,10 @@ const PetProfiles: React.FC = () => {
 
   return (
     <Box p={4} display="flex" flexWrap="wrap" gap={4} justifyContent="center">
-      {dummyPets.map((pet) => (
-        <Card key={pet.id} sx={{ width: 300, boxShadow: 3 }}>
-          {pet.imageUrl && (
-            <CardMedia component="img" height="200" image={pet.imageUrl} alt={pet.name} />
+      {pets.map((pet) => (
+        <Card key={pet.pet_id} sx={{ width: 300, boxShadow: 3 }}>
+          {pet.image_url && (
+            <CardMedia component="img" height="200" image={pet.image_url} alt={pet.name} />
           )}
           <CardContent>
             <Typography variant="h6">{pet.name}</Typography>

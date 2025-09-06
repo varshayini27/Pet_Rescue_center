@@ -70,11 +70,11 @@ const PetDetailDialog: React.FC<Props> = ({ open, onClose, pet }) => {
         >
           {/* Pet Image */}
           <Box flexShrink={0} width={{ xs: '100%', md: 340 }}>
-            {pet.imageUrl && (
+            {pet.image_url && (
               <CardMedia
                 component="img"
                 height="320"
-                image={pet.imageUrl}
+                image={pet.image_url}
                 alt={pet.name}
                 sx={{
                   borderRadius: 3,

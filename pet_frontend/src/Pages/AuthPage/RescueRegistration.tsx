@@ -30,6 +30,8 @@ interface RescueCenterFormInputs {
   password: string;
   confirm_password: string;
   images: FileList;
+  history: string;
+
 }
 
 interface Location {
@@ -38,7 +40,7 @@ interface Location {
 }
 
 const RescueCenterRegister: React.FC = () => {
-  const { register, handleSubmit, reset, formState: { errors }, watch } = useForm<RescueCenterFormInputs>();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<RescueCenterFormInputs>();
   const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -92,29 +94,30 @@ const RescueCenterRegister: React.FC = () => {
     };
     console.log({ payload });
 
-    // try {
-    //   const response = await Http.post(`api/auth/register/rescuecenter`, payload);
-    //   const responseData = response?.data?.data
-    //   const token = responseData?.token;
-    //   if (token) {
-    //     localStorage.setItem('token', token);
-    //     localStorage.setItem('isLoggedIn', 'true');
-    //     dispatch(setAuth({
-    //       token: token,
-    //       role: responseData.role
-    //     }));
-    //     showToastSuccess1(response.data.message || "Registration successful!");
-    //     navigate('/');
+    try {
+      const response = await Http.post(`auth/register/rescuecenter`, payload);
+      const responseData = response?.data?.data
+      const token = responseData?.token;
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('isLoggedIn', 'true');
+        dispatch(setAuth({
+          rescueCenterID:responseData?.rescueCenter?.center_id,
+          token: token,
+          role: responseData.role
+        }));
+        showToastSuccess1(response.data.message || "Registration successful!");
+        navigate('/center/dashboard');
 
-    //   }
-    //   dispatch(setAuth({
-    //     token: token,
-    //     role: responseData.role
-    //   }));
-    // } catch (error) {
-    //   console.error(error);
-    //   showToastError("Registration failed. Please try again.");
-    // }
+      }
+      dispatch(setAuth({
+        token: token,
+        role: responseData.role
+      }));
+    } catch (error) {
+      console.error(error);
+      showToastError("Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -266,7 +269,6 @@ const RescueCenterRegister: React.FC = () => {
 
               {preview && (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2">Image Preview:</Typography>
                   <img
                     src={preview}
                     alt="Preview"
@@ -276,7 +278,16 @@ const RescueCenterRegister: React.FC = () => {
               )}
             </Box>
 
-            <Box sx={{ my: 2, textAlign: "center" }}>
+            <TextField
+              label="History About the center"
+              fullWidth
+              margin="normal"
+              {...register("history", { required: "History is required" })}
+              error={!!errors.history}
+              helperText={errors.history?.message}
+            />
+
+            <Box sx={{ my: 2}}>
               <Button
                 variant="outlined"
                 onClick={getLocation}

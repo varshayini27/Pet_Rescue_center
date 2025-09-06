@@ -1,20 +1,28 @@
 import { useState, useEffect } from "react";
 import { Typography, Card, CardContent, Select, MenuItem, Box, InputLabel, FormControl } from "@mui/material";
 import Navbar from "../../../Components/NavBar";
-import dummy from "../../../assets/dummy-profile.jpg";
-import { rescueCenters } from "../../AboutUs/View/aboutUs";
-import { dummyPets } from "../../RescueCeter/ManagePets/View/ManagePetsview";
+import { useDispatch, useSelector } from "react-redux";
+import type { ReduxState } from "../../../Components/types/redux";
+import { fetchAllPets } from "../../../Services/fetch";
 
 
 export default function PetProfiles() {
+  const dispatch=useDispatch()
+  const { rescueCenters } = useSelector((state: ReduxState) => state.rescueCenter);
   const [selectedCenter, setSelectedCenter] = useState<string>("all");
-  const [filteredPets, setFilteredPets] = useState(dummyPets);
+  const{pets}=useSelector((state:ReduxState)=>state.pet);
+  const [filteredPets, setFilteredPets] = useState(pets);
 
+  
+  useEffect(() => {
+   fetchAllPets(dispatch)
+  }, [dispatch]);
+  console.log({selectedCenter})
   useEffect(() => {
     if (selectedCenter === "all") {
-      setFilteredPets(dummyPets);
+      setFilteredPets(pets);
     } else {
-      setFilteredPets(dummyPets.filter((dummyPets) => dummyPets.rescue_center_id === selectedCenter));
+      setFilteredPets(pets.filter((pets) => pets.rescueCenter?.center_id === selectedCenter));
     }
   }, [selectedCenter]);
 
@@ -41,7 +49,7 @@ export default function PetProfiles() {
               >
                 <MenuItem value="all">All Rescue Centers</MenuItem>
                 {rescueCenters.map((center) => (
-                  <MenuItem key={center.id} value={center.id}>
+                  <MenuItem key={center.center_id} value={center.center_id}>
                     {center.name}
                   </MenuItem>
                 ))}
@@ -56,10 +64,10 @@ export default function PetProfiles() {
               </Typography>
             ) : (
               filteredPets.map((pet) => {
-                const center = rescueCenters.find((c) => c.id === pet.rescue_center_id);
+                const center = rescueCenters.find((c) => c.center_id === pet.rescue_center_id);
                 return (
                   <Card
-                    key={pet.id}
+                    key={pet.pet_id}
                     sx={{
                       width: 300,
                       border: "2px solid #226918",
@@ -74,7 +82,7 @@ export default function PetProfiles() {
                     }}
                   >
                     <img
-                      src={pet.imageUrl}
+                      src={pet.image_url}
                       alt={pet.name}
                       style={{
                         width: "100%",
@@ -89,10 +97,10 @@ export default function PetProfiles() {
                         {pet.name}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#555", mb: 1 }}>
-                        {pet.type} • {pet.age} {pet.age === 1 ? "year" : "years"} old
+                        {pet.species} • {pet.age} {pet.age === 1 ? "year" : "years"} old
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#888", mb: 1 }}>
-                        Rescue Center: {center ? center.name : "Unknown"}
+                        Rescue Center: {pet.rescueCenter?.name}
                       </Typography>
                       <Typography variant="body2" sx={{ color: "#444" }}>
                         {pet.description}
