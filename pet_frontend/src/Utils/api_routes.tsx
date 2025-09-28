@@ -1,4 +1,5 @@
 export const API_ROUTES = {
     RESCUECENTER: "/rescuecenter",
-    PETS:"/pets"
+    PETS:"/pets",
+    ADOPTIONS:"/adoptions"
 };

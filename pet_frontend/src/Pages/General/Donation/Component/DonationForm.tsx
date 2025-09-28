@@ -1,6 +1,7 @@
 
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+
 import {
   Typography,
   TextField,
@@ -15,6 +16,10 @@ import type { ReduxState } from "../../../../Components/types/redux";
 import { fetchRescueCenters } from "../../../../Services/fetch";
 import { useDispatch, useSelector } from "react-redux";
 import type { IRescueCenter } from "../../../../Components/types/RescueCenter";
+import { loadStripe } from "@stripe/stripe-js";
+import Http from "../../../../tools/Http";
+const stripePromise = loadStripe(import.meta.env.VITE_SK); 
+
 
 // Dummy API simulation
 
@@ -41,13 +46,90 @@ export default function RescueCenterDetailPage() {
     return rescueCenters.find((c: any) => c.center_id === centerId) || null;
   };
 
-  const handleDonate = () => {
-    console.log("Donation submitted:", {
-      ...form,
-      rescueCenterId: centerId
-    });
-    showToastSuccess1("Thank you for your donation!");
-  };
+
+  // const handleDonate = async () => {
+  //   if (!form.name || !form.amount || parseFloat(form.amount) <= 0) {
+  //     alert("Please enter your name and a valid donation amount.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const body = {
+  //       user_id: "38D6C543-A4F3-4B4E-B5FE-4603450AE84D",
+  //       rescue_center_id: centerId,
+  //       amount: parseFloat(form.amount),
+  //       name: form.name,
+  //       message: form.message,
+  //     };
+
+  //     const response = await Http.post('/DonationPayment/create-checkout-session', body);
+
+  //     console.log("Stripe session:", response.data);
+
+  //     const stripe = await stripePromise;
+  //     if (!stripe) return alert("Stripe.js not loaded yet.");
+
+  //     const { error } = await stripe.redirectToCheckout({
+  //       sessionId: response.data.sessionId, // lowercase 's'
+  //     });
+
+  //     if (error) {
+  //       console.error("Stripe redirect error:", error);
+  //       alert("Payment failed: " + error.message);
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Donation error:", err.response || err.message || err);
+  //     alert("Something went wrong while processing your donation.");
+  //   }
+  // };
+  const handleDonate = async () => {
+    // ... (input validation)
+
+    try {
+        const body = {
+            user_id: "38D6C543-A4F3-4B4E-B5FE-4603450AE84D",
+            rescue_center_id: centerId,
+            amount: parseFloat(form.amount),
+            name: form.name,
+            message: form.message,
+        };
+        await Http.post('/DonationPayment/confirm', {
+          user_id: body.user_id,
+          rescue_center_id: body.rescue_center_id,
+          amount: body.amount,
+      });
+
+        const response = await Http.post('/DonationPayment/create-checkout-session', body);
+
+        // IMPORTANT: Place console.log *immediately* after the await call
+        console.log("Full response object:", response); // Log the full response object
+        console.log("Stripe session created (response.data):", response.data);
+
+        const stripe = await stripePromise;
+        if (!stripe) return alert("Stripe.js not loaded yet.");
+
+        // Redirect to Stripe Checkout
+        const sessionId = response.data.sessionId; // This was the fix suggested earlier
+
+        const result = await stripe.redirectToCheckout({
+            sessionId: sessionId,
+        });
+       
+      console.log("Donation saved in DB (frontend-triggered).");
+
+        if (result.error) {
+            console.error("Stripe redirect error:", result.error.message);
+            alert("Payment failed: " + result.error.message);
+        }
+    } catch (err: any) {
+        console.error("Donation request error (in catch block):", err.response || err.message || err);
+        alert("Something went wrong while processing your donation.");
+    }
+};
+
+
+
+
 
   if (!center) return <div style={{ padding: "20px" }}>Loading...</div>;
 
@@ -243,6 +325,7 @@ export default function RescueCenterDetailPage() {
                     padding: "10px",
                     fontWeight: "bold"
                   }}
+                  type="button"
                   onClick={handleDonate}
                 >
                   Donate Now

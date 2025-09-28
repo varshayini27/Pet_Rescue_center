@@ -8,18 +8,20 @@ namespace petProfile.Model.DTOs
         public string species { get; set; }
         public string breed { get; set; }
         public string age { get; set; }
-        public bool gender { get; set; }
+        public string gender { get; set; }
         public string size { get; set; }
         public string weight { get; set; }
         public string energy_level { get; set; }
-        public bool vaccination_status { get; set; }
-        public bool spayed_neutered { get; set; }
-        public bool good_with_children { get; set; }
-        public bool good_with_other_pets { get; set; }
+        public string vaccination_status { get; set; }
+        public string spayed_neutered { get; set; }
+        public string good_with_children { get; set; }
+        public string good_with_other_pets { get; set; }
         public string description { get; set; }
         public DateTime rescue_date { get; set; }
         public string rescue_location { get; set; }
         public string rescue_condition { get; set; }
+
+        public string image_url { get; set; }
     }
     public class UpdatePetRequest
     {
@@ -27,19 +29,21 @@ namespace petProfile.Model.DTOs
         public string species { get; set; }
         public string breed { get; set; }
         public string age { get; set; }
-        public bool gender { get; set; }
+        public string gender { get; set; }
         public string size { get; set; }
         public string weight { get; set; }
         public string energy_level { get; set; }
-        public bool vaccination_status { get; set; }
-        public bool spayed_neutered { get; set; }
-        public bool good_with_children { get; set; }
-        public bool good_with_other_pets { get; set; }
+        public string vaccination_status { get; set; }
+        public string spayed_neutered { get; set; }
+        public string good_with_children { get; set; }
+        public string good_with_other_pets { get; set; }
         public string description { get; set; }
         public DateTime rescue_date { get; set; }
         public string rescue_location { get; set; }
         public string rescue_condition { get; set; }
         public string rescued_by { get; set; }
+        public string image_url { get; set; }
+
         public Guid rescue_center_id { get; set; }
     }
 
@@ -50,22 +54,24 @@ namespace petProfile.Model.DTOs
             public string species { get; set; }
             public string breed { get; set; }
             public string age { get; set; }
-            public bool gender { get; set; }
+            public string gender { get; set; }
             public string size { get; set; }
             public string weight { get; set; }
             public string energy_level { get; set; }
-            public bool vaccination_status { get; set; }
-            public bool spayed_neutered { get; set; }
-            public bool good_with_children { get; set; }
-            public bool good_with_other_pets { get; set; }
+            public string vaccination_status { get; set; }
+            public string spayed_neutered { get; set; }
+            public string good_with_children { get; set; }
+            public string good_with_other_pets { get; set; }
             public string description { get; set; }
             public DateTime rescue_date { get; set; }
             public string rescue_location { get; set; }
             public string rescue_condition { get; set; }
             public string rescued_by { get; set; }
-            public bool is_adopted { get; set; }
+            public string adoption_status { get; set; }
+        public string image_url { get; set; }
 
-            // Rescue Center info
-            public RescueCenterResponse RescueCenter { get; set; }
+
+        // Rescue Center info
+        public RescueCenterResponse RescueCenter { get; set; }
         }
     }

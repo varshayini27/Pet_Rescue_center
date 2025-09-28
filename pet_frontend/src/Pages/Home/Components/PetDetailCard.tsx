@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import type { IPet } from '../../../Components/types/Pets';
 import { showToastSuccess1 } from '../../../Components/Commen/TostifyNotification';
+import AdoptionRequestDialog from './AdoptionForm';
 
 
 interface Props {
@@ -24,6 +25,12 @@ interface Props {
 
 const PetDetailDialog: React.FC<Props> = ({ open, onClose, pet }) => {
   if (!pet) return null;
+  // Adoption form dialog open/close logic
+  const [adoptionOpen, setAdoptionOpen] = React.useState(false);
+
+
+
+  
 
   return (
     <Dialog
@@ -252,13 +259,13 @@ const PetDetailDialog: React.FC<Props> = ({ open, onClose, pet }) => {
                     {pet.rescue_condition}
                   </Typography>
                 </Box>
-                {pet?.rescuecenter?.name && (
+                {pet?.rescueCenter?.name && (
                   <Box>
                     <Typography variant="body1" fontWeight={500}>
                       Rescued By:
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {pet.rescuecenter.name}
+                      {pet?.rescueCenter.name}
                     </Typography>
                   </Box>
                 )}
@@ -289,6 +296,8 @@ const PetDetailDialog: React.FC<Props> = ({ open, onClose, pet }) => {
         >
           Close
         </Button>
+        {/* Adoption Form Dialog */}
+        
         <Button
           variant="contained"
           sx={{
@@ -302,16 +311,23 @@ const PetDetailDialog: React.FC<Props> = ({ open, onClose, pet }) => {
               backgroundColor: '#06360D',
             },
           }}
+          
           onClick={() => {
-            
-            showToastSuccess1(`You have requested to adopt ${pet.name}`);
-            onClose();
+            setAdoptionOpen(true)
           }}
         >
           Adopt
         </Button>
       </DialogActions>
+      {adoptionOpen && (
+          <AdoptionRequestDialog
+            open={adoptionOpen}
+            onClose={() => setAdoptionOpen(false)}
+            pet={pet}
+          />
+        )}
     </Dialog>
+    
    
   );
 };

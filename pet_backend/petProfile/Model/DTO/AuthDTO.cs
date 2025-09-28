@@ -1,4 +1,6 @@
-﻿namespace petProfile.Model.DTOs
+﻿using petProfile.Model.DTO;
+
+namespace petProfile.Model.DTOs
 {
     public class RegisterAdopterRequest
     {
@@ -20,6 +22,9 @@
 
         public double latitude { get; set; }
         public double longitude { get; set; }
+        public string image_url { get; set; }
+        public string history { get; set; }
+
     }
 
     public class LoginRequestDto
@@ -42,9 +47,16 @@
         public string province { get; set; }
         public string password { get; set; }
 
+        public string image_url { get; set; }
+        public string history { get; set; }
+
+
 
         public double latitude { get; set; }
         public double longitude { get; set; }
+        public ICollection<PetDto> Pets { get; set; }
+
+
     }
 
 

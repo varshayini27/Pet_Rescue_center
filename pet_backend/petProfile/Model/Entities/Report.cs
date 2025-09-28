@@ -29,10 +29,9 @@ namespace petProfile.Model.Entities
         public DateTime created_at { get; set; } = DateTime.UtcNow;
 
         public Guid? user_id { get; set; }
-        [ForeignKey("UserId")]
+        [ForeignKey("UserId")] 
         public User? User { get; set; }  
         public Guid? rescue_center_id { get; set; }
-        [ForeignKey("UserId")]
         public RescueCenter? RescueCenter { get; set; }
     }
 }

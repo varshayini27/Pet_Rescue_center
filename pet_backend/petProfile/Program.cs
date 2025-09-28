@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using petProfile.Database;
@@ -6,12 +6,27 @@ using petProfile.Interfaces;
 using petProfile.Repositories;
 using petProfile.Services;
 using System.Text;
+using Stripe;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+//.AddJsonOptions(options =>
+//{
+//    // Handle circular references
+//    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+
+//    // Optional: make JSON output more readable
+//    options.JsonSerializerOptions.WriteIndented = true;
+//});
+
+//configure the stripe
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -30,6 +45,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IRescueCenterRepository, RescueCenterRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPetRepository, PetRepository>();
+builder.Services.AddScoped<IAdoptionRepository, AdoptionRepository>();
+
 
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

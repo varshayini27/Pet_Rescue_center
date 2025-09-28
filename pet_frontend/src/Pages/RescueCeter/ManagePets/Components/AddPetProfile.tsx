@@ -99,34 +99,50 @@ const AddPetProfile: React.FC<AddPetProfileProps> = ({ addOpen, setAddOpen, setE
       setPreview(URL.createObjectURL(e.target.files[0]));
     }
   };
+  // Update onSubmit to handle both add and edit modes
   const onSubmit: SubmitHandler<PetFormInputs> = async (data) => {
+    setLoading(true);
     let image_url: string | null = null;
 
-    if (image) {
-      image_url = await uploadImage(image);
-    }
-    const payload = {
-      ...data,
-      image_url: image_url,
-    };
-    console.log({ payload });
-
     try {
-      const response = await Http.post(`/pets/${rescueCenterId}`, payload);
-      const responseData = response?.data?.data
-      console.log({ responseData });
-      if (responseData) {
-        showToastSuccess1("Login successfully")
-        setAddOpen(false)
+      if (image) {
+        image_url = await uploadImage(image);
+      } else if (selectedPet && selectedPet.image_url) {
+        image_url = selectedPet.image_url;
       }
 
+      const payload = {
+        ...data,
+        image_url: image_url,
+      };
+      console.log({ payload });
+
+      let response, responseData;
+      if (editMode && selectedPet && selectedPet.pet_id) {
+        // Edit mode: update pet
+        response = await Http.put(`/pets/${selectedPet.pet_id}`, payload);
+        responseData = response?.data?.data;
+        if (responseData) {
+          showToastSuccess1("Pet updated successfully");
+        }
+      } else {
+        // Add mode: create new pet
+        response = await Http.post(`/pets/${rescueCenterId}`, payload);
+        responseData = response?.data?.data;
+        if (responseData) {
+          showToastSuccess1("Pet added successfully");
+        }
+      }
+
+      setAddOpen(false);
+      setEditMode(false);
     } catch (error) {
       console.error(error);
-      showToastError("Registration failed. Please try again.");
+      showToastError("Operation failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
-
-
 
   const handleDialogClose = () => {
     setApiError(null);
@@ -148,7 +164,7 @@ const AddPetProfile: React.FC<AddPetProfileProps> = ({ addOpen, setAddOpen, setE
           pb: 2,
         }}
       >
-        Add Pet Profile
+        {editMode ? "Edit Pet Profile" : "Add Pet Profile"}
       </DialogTitle>
       <DialogContent
         sx={{
@@ -519,7 +535,7 @@ const AddPetProfile: React.FC<AddPetProfileProps> = ({ addOpen, setAddOpen, setE
           disabled={loading}
           type="submit"
         >
-          {loading ? "Saving..." : "Add Pet"}
+          {loading ? (editMode ? "Saving..." : "Adding...") : (editMode ? "Save Changes" : "Add Pet")}
         </Button>
       </DialogActions>
     </Dialog>

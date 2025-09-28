@@ -9,8 +9,6 @@ namespace petProfile.Model.Entities
         [Key]
         public Guid donation_id { get; set; }
 
-        [Required]
-        [Column(TypeName = "decimal(18,2)")]
         public decimal amount { get; set; } 
 
         [Required]

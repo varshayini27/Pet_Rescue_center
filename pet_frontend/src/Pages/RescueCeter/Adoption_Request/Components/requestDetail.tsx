@@ -8,36 +8,44 @@ import {
   Typography,
   Box
 } from '@mui/material';
-
-interface User {
-  name: string;
-  email: string;
-  phone: string;
-}
-
-interface Pet {
-  name: string;
-  species: string;
-  age: number;
-}
-
-export interface AdoptionRequest {
-  id: number;
-  user: User;
-  pet: Pet;
-  status: 'Pending' | 'Accepted' | 'Rejected';
-}
+import type { IAdoption } from '../../../../Components/types/adoption';
+import Http from '../../../../tools/Http';
 
 interface Props {
   open: boolean;
-  request: AdoptionRequest | null;
+  request: IAdoption | null;
   onClose: () => void;
-  onAccept: (request: AdoptionRequest) => void;
-  onDelete: (request: AdoptionRequest) => void;
 }
 
-const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose, onAccept, onDelete }) => {
+const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose }) => {
   if (!request) return null;
+
+  const updateAdoptionRequestStatus = async (status: 'Accepted' | 'Declined') => {
+    if (!request) return;
+    try {
+      const adoptionId = request.adoption_id // fallback if id is used
+      const payload ={
+        status: status,
+      } 
+  
+     const response = await Http.put(`/adoptions/${adoptionId}`, payload);
+
+      if (!response) {
+        throw new Error('Failed to update status');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error updating adoption request status:', error);
+    }
+  };
+
+  const handleAccept = () => {
+    updateAdoptionRequestStatus('Accepted');
+  };
+
+  const handleDecline = () => {
+    updateAdoptionRequestStatus('Declined');
+  };
 
   return (
     <>
@@ -88,16 +96,17 @@ const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose, onAcce
           <Box display="flex" gap={4} mb={1}>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">Name</Typography>
-              <Typography fontWeight={500}>{request.user.name}</Typography>
+              <Typography fontWeight={500}>{request.full_name}</Typography>
             </Box>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">Email</Typography>
-              <Typography fontWeight={500}>{request.user.email}</Typography>
+              <Typography fontWeight={500}>{request.email}</Typography>
             </Box>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">Phone</Typography>
-              <Typography fontWeight={500}>{request.user.phone}</Typography>
+              <Typography fontWeight={500}>{request.phone}</Typography>
             </Box>
+            
           </Box>
         </Box>
 
@@ -128,6 +137,31 @@ const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose, onAcce
             <Box>
               <Typography variant="subtitle2" color="text.secondary">Age</Typography>
               <Typography fontWeight={500}>{request.pet.age} {request.pet.age === 1 ? 'year' : 'years'}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">Gender</Typography>
+              <Typography fontWeight={500}>{request.pet.gender}</Typography>
+            </Box>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            background: '#f4f8f6',
+            borderRadius: 3,
+            p: 3,
+            boxShadow: '0 2px 8px rgba(34, 105, 24, 0.04)'
+          }}
+        >
+          <Typography
+            variant="h6"
+            mb={2}
+            sx={{ color: '#226918', fontWeight: 600, letterSpacing: 0.5 }}
+          >
+            Reson
+          </Typography>
+          <Box display="flex" gap={4} mb={1}>
+          <Box>
+              <Typography fontWeight={500}>{request.reason}</Typography>
             </Box>
           </Box>
         </Box>
@@ -176,7 +210,7 @@ const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose, onAcce
         <Button
           color="success"
           variant="contained"
-          onClick={() => onAccept(request)}
+          onClick={handleAccept}
           sx={{
             minWidth: 110,
             fontWeight: 600,
@@ -191,7 +225,7 @@ const AdoptionRequestDetail: React.FC<Props> = ({ open, request, onClose, onAcce
         <Button
           color="error"
           variant="outlined"
-          onClick={() => onDelete(request)}
+          onClick={ handleDecline}
           sx={{
             minWidth: 110,
             fontWeight: 600,

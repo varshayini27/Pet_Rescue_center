@@ -61,3 +61,21 @@ export const fetchAllPetsByRescueCenter = async (dispatch: Dispatch,centerId:str
         showToastError(error.toString() || "Failed to fetch Pets");
     }
 };
+export const fetchAllAdoptionRequest = async (dispatch: Dispatch, searchParams?: URLSearchParams) => {
+    const params = searchParams ?? new URLSearchParams();
+    params.append('searchKey', 'name');
+    try {
+        
+        const response = await Http.get(`${API_ROUTES.ADOPTIONS}?${params.toString()}`);
+        const data = response.data;
+        console.log({ data });
+            // dispatch(
+            //     setPetsByRescueCenter({
+            //         data: data.data,
+            //     })
+            // );
+        return data.data;
+    } catch (error: any) {
+        showToastError(error.toString() || "Failed to fetch Requests");
+    }
+};

@@ -22,23 +22,39 @@ Http.interceptors.request.use(async (config) => {
     return config;
 }, (err) => Promise.reject(err));
 
+// Http.interceptors.response.use((response): any => {
+//     requestCount--;
+    
+//     if (requestCount === 0) setLoading(false);
+//     if (!response.data.success && !response?.data?.status) {
+//         return Promise.reject(response?.data);
+//     }
+
+//     return response;
+// }, (error) => {
+//     requestCount--;
+//     if (requestCount === 0) setLoading(false);
+//     if (error.status == 401) {
+//         localStorage.removeItem('token'); 
+//         window.location.pathname = '/';
+//     }
+//     return Promise.reject(error.response.data);
+// });
 Http.interceptors.response.use((response): any => {
     requestCount--;
     
     if (requestCount === 0) setLoading(false);
-    if (!response.data.success && !response?.data?.status) {
+    
+    // Check for success/status only if those properties exist
+    const hasSuccessOrStatus = Object.prototype.hasOwnProperty.call(response.data, 'success') || Object.prototype.hasOwnProperty.call(response.data, 'status');
+    
+    if (hasSuccessOrStatus && !response.data.success && !response?.data?.status) {
         return Promise.reject(response?.data);
     }
 
     return response;
 }, (error) => {
-    requestCount--;
-    if (requestCount === 0) setLoading(false);
-    if (error.status == 401) {
-        localStorage.removeItem('token'); 
-        window.location.pathname = '/';
-    }
-    return Promise.reject(error.response.data);
+    // ... (rest of your error handling)
 });
 
 export default Http;

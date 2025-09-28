@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using petProfile.common;
 using petProfile.Database;
 using petProfile.Interfaces;
+using petProfile.Model.DTOs;
 using petProfile.Model.Entities;
 using System;
 
@@ -15,78 +16,65 @@ namespace petProfile.Controllers;
 [Route("api/rescuecenter")]
 public class RescueCenterController : ControllerBase
 {
-    private readonly IRescueCenterRepository _repository;
+    private readonly IRescueCenterRepository _centerRepository;
 
-    public RescueCenterController(IRescueCenterRepository repository)
+    public RescueCenterController(IRescueCenterRepository centerRepository)
     {
-        _repository = repository;
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> RegisterRescueCenter([FromBody] RescueCenter center)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var created = await _repository.AddAsync(center);
-        var response = new ApiResponse<RescueCenter>(created, "Rescue Center created successfully", 200);
-        return Ok(response);
+        _centerRepository = centerRepository;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var centers = await _repository.GetAllAsync();
+        var centers = await _centerRepository.GetAllAsync();
         return this.SendRes(centers, "Rescue Centers fetched successfully with pets", 200); ;
     }
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var center = await _repository.GetByIdAsync(id);
+        var center = await _centerRepository.GetByIdAsync(id);
         if (center == null)
         {
             return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
         }
-        return Ok(new ApiResponse<RescueCenter>(center, "Rescue Center fetched successfully", 200));
+        return Ok(new ApiResponse<RescueCenterResponse>(center, "Rescue Center fetched successfully", 200));
     }
 
     // ✅ Update
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateRescueCenter(Guid id, [FromBody] RescueCenter updatedCenter)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+    //[HttpPut("{id}")]
+    //public async Task<IActionResult> UpdateRescueCenter(Guid id, [FromBody] RescueCenter updatedCenter)
+    //{
+    //    if (!ModelState.IsValid)
+    //    {
+    //        return BadRequest(ModelState);
+    //    }
 
-        var existingCenter = await _repository.GetByIdAsync(id);
-        if (existingCenter == null)
-        {
-            return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
-        }
+    //    var existingCenter = await _centerRepository.GetByIdAsync(id);
+    //    if (existingCenter == null)
+    //    {
+    //        return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
+    //    }
 
-        // Update editable fields
-        // existingCenter.Name = updatedCenter.Name;
-        // existingCenter.Location = updatedCenter.Location;
-        // existingCenter.ContactNumber = updatedCenter.ContactNumber;
+    //    // Update editable fields
+    //    // existingCenter.Name = updatedCenter.Name;
+    //    // existingCenter.Location = updatedCenter.Location;
+    //    // existingCenter.ContactNumber = updatedCenter.ContactNumber;
 
-        var result = await _repository.UpdateAsync(existingCenter);
-        return Ok(new ApiResponse<RescueCenter>(result, "Rescue Center updated successfully", 200));
-    }
+    //    var result = await _centerRepository.UpdateAsync(existingCenter);
+    //    return Ok(new ApiResponse<RescueCenterResponse>(result, "Rescue Center updated successfully", 200));
+    //}
 
     // ✅ Delete
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRescueCenter(Guid id)
     {
-        var existingCenter = await _repository.GetByIdAsync(id);
+        var existingCenter = await _centerRepository.GetEntityByIdAsync(id);
         if (existingCenter == null)
         {
             return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
         }
 
-        await _repository.DeleteAsync(existingCenter);
+        await _centerRepository.DeleteAsync(existingCenter);
         return Ok(new ApiResponse<string>(null, "Rescue Center deleted successfully", 200));
     }
 }

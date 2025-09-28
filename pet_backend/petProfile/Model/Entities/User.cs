@@ -19,6 +19,8 @@ namespace petProfile.Model.Entities
         public DateTime created_at { get; set; } = DateTime.UtcNow;
         public ICollection<Donation> Donations { get; set; }
         public ICollection<Report> Reports { get; set; }
+        public ICollection<Adoption> Adoptions { get; set; }
+
     }
 
 }

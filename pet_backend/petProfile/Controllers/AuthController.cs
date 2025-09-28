@@ -17,9 +17,9 @@ namespace petProfile.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IRescueCenterRepository _centerRepository;
-        private readonly TokenService _tokenService;
+        private readonly AuthService _tokenService;
 
-        public AuthController(IUserRepository userRepository, IRescueCenterRepository centerRepository, TokenService tokenService)
+        public AuthController(IUserRepository userRepository, IRescueCenterRepository centerRepository, AuthService tokenService)
         {
             _userRepository = userRepository;
             _centerRepository = centerRepository;
@@ -67,14 +67,15 @@ namespace petProfile.Controllers
                 center_id = Guid.NewGuid(),
                 name = request.name,
                 email = request.email,
-                phone_no = request.email,
+                phone_no = request.phone_no,
                 address = request.address,
                 city = request.city,
                 district = request.district,
                 province = request.province,
                 latitude = request.latitude,
                 longitude = request.longitude,
-
+                image_url=request.image_url,
+                history=request.history
             };
 
             await _centerRepository.AddAsync(center);

@@ -15,6 +15,7 @@ namespace petProfile.Database
         public DbSet<RescueCenter> RescueCenters { get; set; }
         public DbSet<Donation> Donations { get; set; }
         public DbSet<Report> Reports { get; set; } // For stray animal reporting
+        public DbSet<Adoption> Adoptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +55,19 @@ namespace petProfile.Database
                 .WithMany(rc => rc.Reports)
                 .HasForeignKey(r => r.rescue_center_id)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent auto-delete of reports if RC deleted
+
+            // One-to-Many: A Pet can have many Adoption requests
+            modelBuilder.Entity<Adoption>()
+                .HasOne(a => a.Pet)
+                .WithMany(p => p.Adoptions)
+                .HasForeignKey(a => a.pet_id)
+                .OnDelete(DeleteBehavior.Cascade);
+            // Optional: A User can make multiple adoption requests
+            modelBuilder.Entity<Adoption>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Adoptions)
+                .HasForeignKey(a => a.user_id)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

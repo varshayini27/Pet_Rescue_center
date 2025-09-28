@@ -6,10 +6,10 @@ using petProfile.Model.Entities;
 
 namespace petProfile.Services
 {
-    public class TokenService
+    public class AuthService
     {
         private readonly IConfiguration _config;
-        public TokenService(IConfiguration config)
+        public AuthService(IConfiguration config)
         {
             _config = config;
         }

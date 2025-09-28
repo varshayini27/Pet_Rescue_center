@@ -195,14 +195,14 @@ export default function MiniDrawer({ children }: { children: React.ReactNode }) 
                 <ListItemIcon><VaccinesIcon /></ListItemIcon>
                 <ListItemText primary="Donation Records" />
               </ListItem>
-              <ListItem button key="MessagesCenter" component={RouterLink as React.ElementType} to="/center/messages">
+              {/* <ListItem button key="MessagesCenter" component={RouterLink as React.ElementType} to="/center/messages">
                 <ListItemIcon><MessageIcon /></ListItemIcon>
                 <ListItemText primary="Messages" />
               </ListItem>
               <ListItem button key="MyProfileCenter" component={RouterLink as React.ElementType} to="/center/profile">
                 <ListItemIcon><PersonIcon /></ListItemIcon>
                 <ListItemText primary="My Profile" />
-              </ListItem>
+              </ListItem> */}
               <Divider />
             </>
           )}

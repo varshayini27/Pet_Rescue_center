@@ -1,68 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, Typography } from '@mui/material';
 import CommonDataTable from '../../../Components/Commen/Table'; // Adjust the path if needed
 import type { TableColumn } from 'react-data-table-component';
-import type { AdoptionRequest } from './Components/requestDetail';
 import AdoptionRequestDetail from './Components/requestDetail';
+import { fetchAllAdoptionRequest } from '../../../Services/fetch';
+import { useDispatch, useSelector } from 'react-redux';
+import type { ReduxState } from '../../../Components/types/redux';
+import type { IAdoption } from '../../../Components/types/adoption';
+import Http from '../../../tools/Http';
 
-const initialRequests: AdoptionRequest[] = [
-  {
-    id: 1,
-    user: {
-      name: 'Alice Johnson',
-      email: 'alice@example.com',
-      phone: '123-456-7890',
-    },
-    pet: {
-      name: 'Bella',
-      species: 'Dog',
-      age: 3,
-    },
-    status: 'Pending' as 'Pending'
-  },
-  {
-    id: 2,
-    user: {
-      name: 'Bob Smith',
-      email: 'bob@example.com',
-      phone: '987-654-3210',
-    },
-    pet: {
-      name: 'Max',
-      species: 'Cat',
-      age: 2,
-    },
-  status: 'Pending' as 'Pending'
-  },
-];
+
 
 const AdoptionRequestPage: React.FC = () => {
-  const [requests, setRequests] = useState<AdoptionRequest[]>(initialRequests);
-  const [selectedRequest, setSelectedRequest] = useState<AdoptionRequest | null>(null);
+  // const [requests, setRequests] = useState<AdoptionRequest[]>();
+  const [selectedRequest, setSelectedRequest] = useState<IAdoption | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filteredAdoptions, setFilteredAdoptions] = useState<IAdoption[]>([]);
+  const rescueCenterId = useSelector((state: ReduxState) => state?.auth?.rescueCenterId);
 
-  const handleView = (request: AdoptionRequest) => {
+const dispatch=useDispatch()
+
+useEffect(() => {
+  const getAdoptions = async () => {
+    const allAdoptions = await fetchAllAdoptionRequest(dispatch);
+    if (allAdoptions) {
+      const filtered = allAdoptions.filter(
+        (adoption: IAdoption) => adoption.pet.rescue_center_id === rescueCenterId
+      );
+      setFilteredAdoptions(filtered);
+      console.log("Filtered Adoptions:", filtered);
+    }
+  };
+
+  getAdoptions();
+}, [dispatch]);
+
+  const handleView = (request: IAdoption) => {
     setSelectedRequest(request);
     setDialogOpen(true);
   };
+const handleDelete = async (request: IAdoption) => {
+  try {
+    await Http.delete(`/adoptions/${request.adoption_id}`);
+    // Remove the deleted request from the filteredAdoptions state
+    setFilteredAdoptions(prev =>
+      prev.filter(adoption => adoption.adoption_id !== request.adoption_id)
+    );
+  } catch (error) {
+    console.error('Failed to delete adoption request:', error);
+  }
+};
 
-  const handleAccept = (request: AdoptionRequest) => {
-    // const updated = requests.map(r =>
-    //   r.id === request.id ? { ...r, status: 'Accepted' } : r
-    // );
-    // setRequests(updated);
-    // setDialogOpen(false);
-  };
 
-  const handleDelete = (request: AdoptionRequest) => {
-    const updated = requests.filter(r => r.id !== request.id);
-    setRequests(updated);
-    setDialogOpen(false);
-  };
+  
 
-  const columns: TableColumn<AdoptionRequest>[] = [
-    { name: 'ID', selector: row => row.id, sortable: true },
-    { name: 'User Name', selector: row => row.user.name, sortable: true },
+  const columns: TableColumn<IAdoption>[] = [
+    { name: 'User Name', selector: row => row.full_name, sortable: true },
     { name: 'Pet Name', selector: row => row.pet.name, sortable: true },
     { name: 'Status', selector: row => row.status, sortable: true },
     {
@@ -81,11 +74,11 @@ const AdoptionRequestPage: React.FC = () => {
 
       <Card sx={{ padding: 3, maxWidth: '100%', margin: '0 auto' }}>
         <CommonDataTable
-          dataRows={requests}
+          dataRows={filteredAdoptions}
           dataColumns={columns}
           pagination={true}
           onDelete={handleDelete}
-          paginationTotalRows={requests.length}
+          paginationTotalRows={filteredAdoptions.length}
         />
       </Card>
 
@@ -93,11 +86,9 @@ const AdoptionRequestPage: React.FC = () => {
         open={dialogOpen}
         request={selectedRequest}
         onClose={() => setDialogOpen(false)}
-        onAccept={handleAccept}
-        onDelete={handleDelete}
       />
     </Box>
-  );
+  ); 
 };
 
 export default AdoptionRequestPage;

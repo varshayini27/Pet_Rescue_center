@@ -22,6 +22,50 @@ namespace petProfile.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("petProfile.Model.Entities.Adoption", b =>
+                {
+                    b.Property<Guid>("adoption_id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("full_name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("pet_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("request_date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("user_id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("adoption_id");
+
+                    b.HasIndex("pet_id");
+
+                    b.HasIndex("user_id");
+
+                    b.ToTable("Adoptions");
+                });
+
             modelBuilder.Entity("petProfile.Model.Entities.Donation", b =>
                 {
                     b.Property<Guid>("donation_id")
@@ -55,6 +99,10 @@ namespace petProfile.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("adoption_status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("age")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -71,17 +119,21 @@ namespace petProfile.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("gender")
-                        .HasColumnType("bit");
+                    b.Property<string>("gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("good_with_children")
-                        .HasColumnType("bit");
+                    b.Property<string>("good_with_children")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("good_with_other_pets")
-                        .HasColumnType("bit");
+                    b.Property<string>("good_with_other_pets")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("is_adopted")
-                        .HasColumnType("bit");
+                    b.Property<string>("image_url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("name")
                         .IsRequired()
@@ -108,15 +160,17 @@ namespace petProfile.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("spayed_neutered")
-                        .HasColumnType("bit");
+                    b.Property<string>("spayed_neutered")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("species")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("vaccination_status")
-                        .HasColumnType("bit");
+                    b.Property<string>("vaccination_status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("weight")
                         .IsRequired()
@@ -199,6 +253,13 @@ namespace petProfile.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("history")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("image_url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("latitude")
                         .HasColumnType("float");
 
@@ -251,6 +312,24 @@ namespace petProfile.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("petProfile.Model.Entities.Adoption", b =>
+                {
+                    b.HasOne("petProfile.Model.Entities.Pet", "Pet")
+                        .WithMany("Adoptions")
+                        .HasForeignKey("pet_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("petProfile.Model.Entities.User", "User")
+                        .WithMany("Adoptions")
+                        .HasForeignKey("user_id")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Pet");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("petProfile.Model.Entities.Donation", b =>
                 {
                     b.HasOne("petProfile.Model.Entities.RescueCenter", "RescueCenter")
@@ -298,6 +377,11 @@ namespace petProfile.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("petProfile.Model.Entities.Pet", b =>
+                {
+                    b.Navigation("Adoptions");
+                });
+
             modelBuilder.Entity("petProfile.Model.Entities.RescueCenter", b =>
                 {
                     b.Navigation("Donations");
@@ -309,6 +393,8 @@ namespace petProfile.Migrations
 
             modelBuilder.Entity("petProfile.Model.Entities.User", b =>
                 {
+                    b.Navigation("Adoptions");
+
                     b.Navigation("Donations");
 
                     b.Navigation("Reports");

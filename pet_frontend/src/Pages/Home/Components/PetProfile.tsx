@@ -8,6 +8,7 @@ import type { IPet } from '../../../Components/types/Pets';
 import type { ReduxState } from '../../../Components/types/redux';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllPets } from '../../../Services/fetch';
+import AdoptionRequestDialog from './AdoptionForm';
 
 
 
@@ -17,6 +18,8 @@ const PetProfiles: React.FC = () => {
   const dispatch = useDispatch()
   const [selectedPet, setSelectedPet] = useState<IPet | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [adoptionOpen, setAdoptionOpen] = useState(false);
+
 
   useEffect(() => {
     fetchAllPets(dispatch)
@@ -25,6 +28,10 @@ const PetProfiles: React.FC = () => {
   const handleOpenDialog = (pet: IPet) => {
     setSelectedPet(pet);
     setDialogOpen(true);
+  };
+  const handleOpenFormDialog = (pet: IPet) => {
+    setSelectedPet(pet);
+    setAdoptionOpen(true);
   };
 console.log({pets})
   const handleCloseDialog = () => {
@@ -62,7 +69,9 @@ console.log({pets})
             >
               View
             </Button>
-            <Button variant="contained" sx={{ backgroundColor: '#084C11', color: '#fff' }}>
+            <Button variant="contained" sx={{ backgroundColor: '#084C11', color: '#fff' }}
+             onClick={() => handleOpenFormDialog(pet)}
+             >
               ADOPT
             </Button>
 
@@ -75,6 +84,14 @@ console.log({pets})
         onClose={handleCloseDialog}
         pet={selectedPet}
       />
+
+{adoptionOpen && (
+          <AdoptionRequestDialog
+            open={adoptionOpen}
+            onClose={() => setAdoptionOpen(false)}
+            pet={selectedPet}
+          />
+        )}
     </Box>
   );
 };
