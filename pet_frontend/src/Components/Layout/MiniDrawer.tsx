@@ -198,11 +198,11 @@ export default function MiniDrawer({ children }: { children: React.ReactNode }) 
               {/* <ListItem button key="MessagesCenter" component={RouterLink as React.ElementType} to="/center/messages">
                 <ListItemIcon><MessageIcon /></ListItemIcon>
                 <ListItemText primary="Messages" />
-              </ListItem>
-              <ListItem button key="MyProfileCenter" component={RouterLink as React.ElementType} to="/center/profile">
+              </ListItem>*/}
+              <ListItem button key="MyProfileCenter" component={RouterLink as React.ElementType} to="/center/editProfile">
                 <ListItemIcon><PersonIcon /></ListItemIcon>
                 <ListItemText primary="My Profile" />
-              </ListItem> */}
+              </ListItem> 
               <Divider />
             </>
           )}

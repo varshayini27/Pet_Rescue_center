@@ -8,7 +8,8 @@ namespace petProfile.Interfaces
         Task<RescueCenter> AddAsync(RescueCenter center);
         Task<List<RescueCenterResponse>> GetAllAsync();
         Task<RescueCenterResponse?> GetByIdAsync(Guid id);
-        //Task<RescueCenterResponse> UpdateAsync(RescueCenter center);
+        Task<RescueCenter?> UpdateAsync(Guid id, UpdateRescueCenterRequest updatedCenter);
+
         Task DeleteAsync(RescueCenter center);
         Task <RescueCenter>GetEntityByIdAsync(Guid id);
 

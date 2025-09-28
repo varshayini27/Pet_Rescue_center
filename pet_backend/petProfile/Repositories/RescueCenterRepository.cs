@@ -88,9 +88,17 @@ namespace petProfile.Repositories
             {
                 center_id = center.center_id,
                 name = center.name,
+                email = center.email,
+                phone_no = center.phone_no,
+                address = center.address,
                 city = center.city,
                 district = center.district,
-               
+                province = center.province,
+                image_url = center.image_url,
+                history = center.history,
+                latitude = center.latitude,
+                longitude = center.longitude,
+
                 Pets = center.Pets.Select(p => new PetDto
                 {
                     pet_id = p.pet_id,
@@ -128,6 +136,33 @@ namespace petProfile.Repositories
         //    await _context.SaveChangesAsync();
         //    return center;
         //}
+
+        public async Task<RescueCenter?> UpdateAsync(Guid id, UpdateRescueCenterRequest updatedCenter)
+        {
+            var existingCenter = await _context.RescueCenters.FirstOrDefaultAsync(c => c.center_id == id);
+
+            if (existingCenter == null)
+                return null;
+
+            // Update fields
+            existingCenter.name = updatedCenter.name;
+            existingCenter.email = updatedCenter.email;
+            existingCenter.phone_no = updatedCenter.phone_no;
+            existingCenter.address = updatedCenter.address;
+            existingCenter.city = updatedCenter.city;
+            existingCenter.district = updatedCenter.district;
+            existingCenter.province = updatedCenter.province;
+            existingCenter.image_url = updatedCenter.image_url;
+            existingCenter.history = updatedCenter.history;
+            existingCenter.latitude = updatedCenter.latitude;
+            existingCenter.longitude = updatedCenter.longitude;
+
+            _context.RescueCenters.Update(existingCenter);
+            await _context.SaveChangesAsync();
+
+            return existingCenter;
+        }
+
 
         public async Task DeleteAsync(RescueCenter center)
         {

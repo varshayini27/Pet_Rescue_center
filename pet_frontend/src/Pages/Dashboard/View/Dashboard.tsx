@@ -1,176 +1,290 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { Box, Card, Typography, CircularProgress } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllPetsByRescueCenter, fetchAllAdoptionRequest, fetchAllDonation } from "../../../Services/fetch";
+import type { ReduxState } from "../../../Components/types/redux";
+import type { IAdoption } from "../../../Components/types/adoption";
+import type { IDonation } from "../../../Components/types/donation";
+import type { IPet } from "../../../Components/types/Pets";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
-const Dashboard = () => {
+const COLORS = ["#4caf50", "#2196f3", "#ff9800", "#f44336", "#9c27b0", "#00bcd4"];
+
+const Dashboard: React.FC = () => {
+  const dispatch = useDispatch();
+  const rescueCenterId = useSelector((state: ReduxState) => state?.auth?.rescueCenterId) as string;
+
+  const [pets, setPets] = useState<IPet[]>([]);
+  const [adoptions, setAdoptions] = useState<IAdoption[]>([]);
+  const [donations, setDonations] = useState<IDonation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch all data
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (!rescueCenterId) {
+          setPets([]);
+          setAdoptions([]);
+          setDonations([]);
+          setLoading(false);
+          return;
+        }
+        // Fetch pets for this rescue center
+        const petsData = await fetchAllPetsByRescueCenter(dispatch, rescueCenterId);
+        setPets(petsData || []);
+
+        // Fetch all adoptions, then filter by pets belonging to this rescue center
+        const adoptionsData = await fetchAllAdoptionRequest(dispatch);
+        const petIds = (petsData || []).map((pet: any) => pet.pet_id);
+        const filteredAdoptions =
+          adoptionsData?.filter((adoption: IAdoption) =>
+            petIds.includes(adoption.pet_id)
+          ) || [];
+        setAdoptions(filteredAdoptions);
+
+        // Fetch all donations, then filter by rescue center
+        const donationsData = await fetchAllDonation(dispatch);
+        const filteredDonations =
+          donationsData?.filter((donation: IDonation) =>
+            donation.rescue_center_id === rescueCenterId
+          ) || [];
+        setDonations(filteredDonations);
+      } catch (e) {
+        setPets([]);
+        setAdoptions([]);
+        setDonations([]);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, [dispatch, rescueCenterId]);
+
+  // --- Data Aggregation ---
+
+  // Pets
+  const totalPets = pets.length;
+  // If your pet object has no status/type, these will be 0
+  const adoptedPets = pets.filter((pet: any) => pet.status?.toLowerCase() === "adopted").length;
+  const availablePets = pets.filter((pet: any) => pet.status?.toLowerCase() === "available").length;
+
+  // Adoptions
+  const totalAdoptions = adoptions.length;
+  const pendingAdoptions = adoptions.filter((a: any) => a.status?.toLowerCase() === "pending").length;
+  const approvedAdoptions = adoptions.filter((a: any) => a.status?.toLowerCase() === "approved").length;
+  const rejectedAdoptions = adoptions.filter((a: any) => a.status?.toLowerCase() === "rejected").length;
+
+  // Donations
+  const totalDonationAmount = donations.reduce((sum, d) => sum + d.amount, 0);
+  const uniqueDonors = new Set(donations.map((d) => d.user_id)).size;
+  const largestDonation = donations.reduce((max, d) => (d.amount > max ? d.amount : max), 0);
+  const topDonor =
+    donations.length > 0
+      ? donations.reduce((a, b) => (a.amount > b.amount ? a : b)).name
+      : "-";
+
+  // Donations by date (for chart)
+  const donationsByDate = (() => {
+    const map: { [date: string]: number } = {};
+    donations.forEach((d) => {
+      map[d.date] = (map[d.date] || 0) + d.amount;
+    });
+    return Object.entries(map)
+      .map(([date, total]) => ({ date, total }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  })();
+
+  // Pets by type (for pie chart)
+  const petsByType = (() => {
+    const map: { [species: string]: number } = {};
+    pets.forEach((pet: any) => {
+      if (pet.species) {
+        map[pet.species] = (map[pet.species] || 0) + 1;
+      }
+    });
+    return Object.entries(map).map(([species, value]) => ({ name: species, value }));
+  })();
+
+  // Adoptions by status (for bar chart)
+  const adoptionsByStatus = [
+    { status: "Pending", count: pendingAdoptions },
+    { status: "Approved", count: approvedAdoptions },
+    { status: "Rejected", count: rejectedAdoptions },
+  ];
+
+  // --- UI ---
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <div style={{ background: "#f4f8f6", minHeight: "100vh", padding: "32px" }}>
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginBottom: 32 }}>
-        {/* Stat Cards */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          minWidth: 220,
-          flex: 1
-        }}>
-          <div style={{ fontSize: 18, color: "#888" }}>Total Pets</div>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#226918" }}>128</div>
-        </div>
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          minWidth: 220,
-          flex: 1
-        }}>
-          <div style={{ fontSize: 18, color: "#888" }}>Adoptions This Month</div>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#1e7735" }}>23</div>
-        </div>
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          minWidth: 220,
-          flex: 1
-        }}>
-          <div style={{ fontSize: 18, color: "#888" }}>Pending Requests</div>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#e67e22" }}>7</div>
-        </div>
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          minWidth: 220,
-          flex: 1
-        }}>
-          <div style={{ fontSize: 18, color: "#888" }}>Donations (₹)</div>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#2d98da" }}>₹12,500</div>
-        </div>
-      </div>
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h4" fontWeight={700} mb={3}>
+        Rescue Center Dashboard
+      </Typography>
 
-      {/* Charts and Recent Activity */}
-      <div style={{ display: "flex", gap: 32, flexWrap: "wrap" }}>
-        {/* Chart Section */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          flex: 2,
-          minWidth: 350
-        }}>
-          <h2 style={{ color: "#226918", fontSize: 20, marginBottom: 16 }}>Adoptions Over Time</h2>
-          {/* Dummy Bar Chart */}
-          <svg width="100%" height="180" viewBox="0 0 400 180">
-            <rect x="30" y="80" width="30" height="70" fill="#1e7735" rx="6"/>
-            <rect x="80" y="60" width="30" height="90" fill="#2d98da" rx="6"/>
-            <rect x="130" y="40" width="30" height="110" fill="#e67e22" rx="6"/>
-            <rect x="180" y="100" width="30" height="50" fill="#226918" rx="6"/>
-            <rect x="230" y="60" width="30" height="90" fill="#1e7735" rx="6"/>
-            <rect x="280" y="30" width="30" height="120" fill="#2d98da" rx="6"/>
-            <rect x="330" y="90" width="30" height="60" fill="#e67e22" rx="6"/>
-            {/* X-axis labels */}
-            <text x="35" y="165" fontSize="12" fill="#888">Jan</text>
-            <text x="85" y="165" fontSize="12" fill="#888">Feb</text>
-            <text x="135" y="165" fontSize="12" fill="#888">Mar</text>
-            <text x="185" y="165" fontSize="12" fill="#888">Apr</text>
-            <text x="235" y="165" fontSize="12" fill="#888">May</text>
-            <text x="285" y="165" fontSize="12" fill="#888">Jun</text>
-            <text x="335" y="165" fontSize="12" fill="#888">Jul</text>
-          </svg>
-        </div>
+      {/* Summary Cards */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 3,
+          mb: 3,
+        }}
+      >
+        <Card sx={{ flex: "1 1 200px", p: 3, textAlign: "center", bgcolor: "#e3f2fd", minWidth: 180 }}>
+          <Typography variant="h5" color="primary" fontWeight={700}>
+            {totalPets}
+          </Typography>
+          <Typography variant="subtitle1">Total Pets</Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 3, textAlign: "center", bgcolor: "#e8f5e9", minWidth: 180 }}>
+          <Typography variant="h5" color="success.main" fontWeight={700}>
+            {adoptedPets}
+          </Typography>
+          <Typography variant="subtitle1">Adopted Pets</Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 3, textAlign: "center", bgcolor: "#fff3e0", minWidth: 180 }}>
+          <Typography variant="h5" color="warning.main" fontWeight={700}>
+            {availablePets}
+          </Typography>
+          <Typography variant="subtitle1">Available Pets</Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 3, textAlign: "center", bgcolor: "#f3e5f5", minWidth: 180 }}>
+          <Typography variant="h5" color="secondary" fontWeight={700}>
+            {totalAdoptions}
+          </Typography>
+          <Typography variant="subtitle1">Adoption Requests</Typography>
+        </Card>
+      </Box>
 
-        {/* Recent Activity */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 16,
-          boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-          padding: 24,
-          flex: 1,
-          minWidth: 300
-        }}>
-          <h2 style={{ color: "#226918", fontSize: 20, marginBottom: 16 }}>Recent Activity</h2>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            <li style={{ marginBottom: 18 }}>
-              <span style={{ color: "#1e7735", fontWeight: 600 }}>Adoption Request</span> for <b>Max</b> by <b>Priya S.</b>
-              <div style={{ fontSize: 12, color: "#888" }}>2 hours ago</div>
-            </li>
-            <li style={{ marginBottom: 18 }}>
-              <span style={{ color: "#2d98da", fontWeight: 600 }}>Donation</span> of <b>₹1,000</b> by <b>Rahul K.</b>
-              <div style={{ fontSize: 12, color: "#888" }}>Today</div>
-            </li>
-            <li style={{ marginBottom: 18 }}>
-              <span style={{ color: "#e67e22", fontWeight: 600 }}>New Pet Added</span>: <b>Bella</b> (Dog)
-              <div style={{ fontSize: 12, color: "#888" }}>Yesterday</div>
-            </li>
-            <li>
-              <span style={{ color: "#226918", fontWeight: 600 }}>Adoption Approved</span> for <b>Luna</b>
-              <div style={{ fontSize: 12, color: "#888" }}>2 days ago</div>
-            </li>
-          </ul>
-        </div>
-      </div>
+      {/* Quick Stats */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 3,
+          mb: 3,
+        }}
+      >
+        <Card sx={{ flex: "1 1 200px", p: 2, textAlign: "center", bgcolor: "#f5f5f5", minWidth: 180 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Total Donations
+          </Typography>
+          <Typography variant="h6" color="primary" fontWeight={700}>
+            ${totalDonationAmount}
+          </Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 2, textAlign: "center", bgcolor: "#f5f5f5", minWidth: 180 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Unique Donors
+          </Typography>
+          <Typography variant="h6" color="success.main" fontWeight={700}>
+            {uniqueDonors}
+          </Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 2, textAlign: "center", bgcolor: "#f5f5f5", minWidth: 180 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Largest Donation
+          </Typography>
+          <Typography variant="h6" color="warning.main" fontWeight={700}>
+            ${largestDonation}
+          </Typography>
+        </Card>
+        <Card sx={{ flex: "1 1 200px", p: 2, textAlign: "center", bgcolor: "#f5f5f5", minWidth: 180 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Top Donor
+          </Typography>
+          <Typography variant="h6" color="secondary" fontWeight={700}>
+            {topDonor}
+          </Typography>
+        </Card>
+      </Box>
 
-      {/* Table of Pets */}
-      <div style={{
-        background: "#fff",
-        borderRadius: 16,
-        boxShadow: "0 2px 12px rgba(34,105,24,0.08)",
-        padding: 24,
-        marginTop: 40
-      }}>
-        <h2 style={{ color: "#226918", fontSize: 20, marginBottom: 16 }}>Pets in Shelter</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#f4f8f6" }}>
-                <th style={{ padding: "12px 8px", textAlign: "left", color: "#226918" }}>Name</th>
-                <th style={{ padding: "12px 8px", textAlign: "left", color: "#226918" }}>Type</th>
-                <th style={{ padding: "12px 8px", textAlign: "left", color: "#226918" }}>Age</th>
-                <th style={{ padding: "12px 8px", textAlign: "left", color: "#226918" }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ padding: "10px 8px" }}>Max</td>
-                <td style={{ padding: "10px 8px" }}>Dog</td>
-                <td style={{ padding: "10px 8px" }}>2 years</td>
-                <td style={{ padding: "10px 8px", color: "#1e7735", fontWeight: 600 }}>Available</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "10px 8px" }}>Bella</td>
-                <td style={{ padding: "10px 8px" }}>Dog</td>
-                <td style={{ padding: "10px 8px" }}>1 year</td>
-                <td style={{ padding: "10px 8px", color: "#e67e22", fontWeight: 600 }}>Pending</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "10px 8px" }}>Luna</td>
-                <td style={{ padding: "10px 8px" }}>Cat</td>
-                <td style={{ padding: "10px 8px" }}>3 years</td>
-                <td style={{ padding: "10px 8px", color: "#2d98da", fontWeight: 600 }}>Adopted</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "10px 8px" }}>Charlie</td>
-                <td style={{ padding: "10px 8px" }}>Dog</td>
-                <td style={{ padding: "10px 8px" }}>4 months</td>
-                <td style={{ padding: "10px 8px", color: "#1e7735", fontWeight: 600 }}>Available</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "10px 8px" }}>Simba</td>
-                <td style={{ padding: "10px 8px" }}>Cat</td>
-                <td style={{ padding: "10px 8px" }}>5 years</td>
-                <td style={{ padding: "10px 8px", color: "#e67e22", fontWeight: 600 }}>Pending</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      {/* Charts */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 3,
+        }}
+      >
+        <Card sx={{ flex: "1 1 350px", p: 2, minWidth: 320, height: 370 }}>
+          <Typography variant="subtitle1" fontWeight={600} mb={2}>
+            Donations Over Time
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={donationsByDate}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="total" fill="#4caf50" name="Total Amount" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card sx={{ flex: "1 1 350px", p: 2, minWidth: 320, height: 370 }}>
+          <Typography variant="subtitle1" fontWeight={600} mb={2}>
+            Pets by Type
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={petsByType}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                label
+              >
+                {petsByType.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card sx={{ flex: "1 1 350px", p: 2, minWidth: 320, height: 370 }}>
+          <Typography variant="subtitle1" fontWeight={600} mb={2}>
+            Adoption Requests by Status
+          </Typography>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={adoptionsByStatus}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="status" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#2196f3" name="Requests" />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </Box>
+    </Box>
+  );
+};
 
-  )
-}
+export default Dashboard;
 
-export default Dashboard

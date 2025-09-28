@@ -26,6 +26,23 @@ namespace petProfile.Model.DTOs
         public string history { get; set; }
 
     }
+    public class UpdateRescueCenterRequest
+    {
+        public string name { get; set; }
+        public string email { get; set; }
+        public string phone_no { get; set; }
+        public string address { get; set; }
+        public string city { get; set; }
+        public string district { get; set; }
+        public string province { get; set; }
+
+
+        public double latitude { get; set; }
+        public double longitude { get; set; }
+        public string image_url { get; set; }
+        public string history { get; set; }
+
+    }
 
     public class LoginRequestDto
     {

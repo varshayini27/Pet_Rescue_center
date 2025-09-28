@@ -17,6 +17,7 @@ import AboutUs from '../Pages/AboutUs/View/aboutUs';
 import DonationRecord from '../Pages/RescueCeter/DonationRecord/View/DonationRecord';
 import ContactUs from '../Pages/ContactUs/View/ContactUs';
 import RescueCenterDetailPage from '../Pages/General/Donation/Component/DonationForm';
+import EditCenterProfile from '../Pages/RescueCeter/ProfileManagement/EditProfile';
 
 const AppRoutes = () => {
   return (
@@ -30,6 +31,7 @@ const AppRoutes = () => {
       <Route path="/center/managepet" element={<DefaultLayout><PetTable /></DefaultLayout>} />
       <Route path="/center/requests" element={<DefaultLayout>< AdoptionRequestPage /></DefaultLayout>} />
       <Route path="/center/donation_record" element={<DefaultLayout><DonationRecord /></DefaultLayout>} />
+      <Route path="/center/editProfile" element={<DefaultLayout><EditCenterProfile /></DefaultLayout>} />
       <Route path="/signin" element={< RegisterChoicePage />} />
       <Route path="/signin/register_rescue" element={< RescueCenterRegister />} />
       <Route path="/signin/register_user" element={< UserRegister />} />

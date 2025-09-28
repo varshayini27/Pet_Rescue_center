@@ -40,29 +40,43 @@ public class RescueCenterController : ControllerBase
         return Ok(new ApiResponse<RescueCenterResponse>(center, "Rescue Center fetched successfully", 200));
     }
 
-    // ✅ Update
-    //[HttpPut("{id}")]
-    //public async Task<IActionResult> UpdateRescueCenter(Guid id, [FromBody] RescueCenter updatedCenter)
-    //{
-    //    if (!ModelState.IsValid)
-    //    {
-    //        return BadRequest(ModelState);
-    //    }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateRescueCenter(Guid id, [FromBody] UpdateRescueCenterRequest updatedCenter)
+    {
+        if (updatedCenter == null)
+        {
+            return BadRequest(new ApiResponse<string>(null, "Invalid request data", 400));
+        }
 
-    //    var existingCenter = await _centerRepository.GetByIdAsync(id);
-    //    if (existingCenter == null)
-    //    {
-    //        return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
-    //    }
+        var center = await _centerRepository.UpdateAsync(id, updatedCenter);
 
-    //    // Update editable fields
-    //    // existingCenter.Name = updatedCenter.Name;
-    //    // existingCenter.Location = updatedCenter.Location;
-    //    // existingCenter.ContactNumber = updatedCenter.ContactNumber;
+        if (center == null)
+        {
+            return NotFound(new ApiResponse<string>(null, "Rescue Center not found", 404));
+        }
 
-    //    var result = await _centerRepository.UpdateAsync(existingCenter);
-    //    return Ok(new ApiResponse<RescueCenterResponse>(result, "Rescue Center updated successfully", 200));
-    //}
+        return Ok(new ApiResponse<RescueCenterResponse>(
+            new RescueCenterResponse
+            {
+                center_id = center.center_id,
+                name = center.name,
+                email = center.email,
+                phone_no = center.phone_no,
+                address = center.address,
+                city = center.city,
+                district = center.district,
+                province = center.province,
+                image_url = center.image_url,
+                history = center.history,
+                latitude = center.latitude,
+                longitude = center.longitude
+            },
+            "Rescue Center updated successfully",
+            200
+        ));
+    }
+
+
 
     // ✅ Delete
     [HttpDelete("{id}")]

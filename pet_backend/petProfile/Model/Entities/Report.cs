@@ -24,7 +24,8 @@ namespace petProfile.Model.Entities
         [Required]
         public double longitude { get; set; } 
 
-        public string? image_url { get; set; } 
+        public string? image_url { get; set; }
+        public string status { get; set; } = "Pending";
 
         public DateTime created_at { get; set; } = DateTime.UtcNow;
 

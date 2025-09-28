@@ -9,6 +9,10 @@ namespace petProfile.Model.Entities
         [Key]
         public Guid donation_id { get; set; }
 
+        public string name { get; set; }
+        public string message { get; set; }
+
+
         public decimal amount { get; set; } 
 
         [Required]

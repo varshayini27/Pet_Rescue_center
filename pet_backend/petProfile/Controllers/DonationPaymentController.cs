@@ -6,6 +6,8 @@ using petProfile.Model.Entities;
 using System;
 using Stripe;
 using Stripe.Checkout;
+using Microsoft.EntityFrameworkCore;
+using petProfile.Model.DTOs;
 
 namespace petProfile.Controllers
 {
@@ -60,6 +62,8 @@ namespace petProfile.Controllers
             {
                 donation_id = Guid.NewGuid(),
                 amount = request.amount,
+                name = request.name,
+                message = request.message,
                 user_id = request.user_id,
                 rescue_center_id = request.rescue_center_id,
                 date = DateTime.UtcNow
@@ -70,5 +74,32 @@ namespace petProfile.Controllers
 
             return Ok(donation);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetAllDonations()
+        {
+            try
+            {
+                var donations = await _context.Donations
+                    .Select(d => new
+                    {
+                        d.donation_id,
+                        d.name,
+                        d.amount,
+                        d.message,
+                        d.user_id,
+                        d.rescue_center_id,
+                        d.date
+                    })
+                    .ToListAsync();
+
+                return Ok(donations);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = ex.Message });
+            }
+        }
+
     }
 }

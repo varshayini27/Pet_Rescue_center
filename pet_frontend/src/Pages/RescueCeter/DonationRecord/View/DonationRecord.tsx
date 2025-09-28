@@ -11,40 +11,14 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { fetchAllDonation } from "../../../../Services/fetch";
+import { useDispatch, useSelector } from "react-redux";
+import type { IDonation } from "../../../../Components/types/donation";
+import type { ReduxState } from "../../../../Components/types/redux";
 
-const fetchDonationRecords = async () => {
-  return [
-    {
-      id: 1,
-      donorName: "John Doe",
-      amount: 100,
-      date: "2024-06-01",
-      method: "Credit Card",
-    },
-    {
-      id: 2,
-      donorName: "Jane Smith",
-      amount: 250,
-      date: "2024-06-02",
-      method: "Paypal",
-    },
-    {
-      id: 3,
-      donorName: "Alice Johnson",
-      amount: 75,
-      date: "2024-06-02",
-      method: "Credit Card",
-    },
-    {
-      id: 4,
-      donorName: "Bob Lee",
-      amount: 150,
-      date: "2024-06-03",
-      method: "Bank Transfer",
-    },
-    // ...more records
-  ];
-};
+
+
+
 
 const aggregateByDate = (records: any[]) => {
   // Aggregate total amount per date
@@ -75,28 +49,44 @@ const aggregateByMethod = (records: any[]) => {
 const DonationRecord: React.FC = () => {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filteredDonation, setFilteredDonations] = useState<IDonation[]>([]);
+  const rescueCenterId = useSelector((state: ReduxState) => state?.auth?.rescueCenterId);
+
+console.log({rescueCenterId})
+console.log({records})
+
+const dispatch=useDispatch();
+ 
 
   useEffect(() => {
-    // Replace with real API call
-    fetchDonationRecords().then((data) => {
-      setRecords(data);
-      setLoading(false);
-    });
-  }, []);
+    const getDonations = async () => {
+      const allDonations = await fetchAllDonation(dispatch);
+      console.log({allDonations})
+      if (allDonations) {
+        const filtered = allDonations.filter(
+          (donation: IDonation) => donation.rescue_center_id === rescueCenterId
+        );
+        setFilteredDonations(filtered);
+        console.log("Filtered Donations:", filtered);
+      }
+    };
+  
+    getDonations();
+  }, [dispatch]);
+  const totalAmount = filteredDonation.reduce((sum, rec) => sum + rec.amount, 0);
+  const totalDonations = filteredDonation.length;
+  const uniqueDonors = new Set(filteredDonation.map((rec) => rec.user_id)).size;
 
-  const totalAmount = records.reduce((sum, rec) => sum + rec.amount, 0);
-  const totalDonations = records.length;
-  const uniqueDonors = new Set(records.map((rec) => rec.donorName)).size;
+  const dataByDate = aggregateByDate(filteredDonation);
+  const dataByMethod = aggregateByMethod(filteredDonation);
 
-  const dataByDate = aggregateByDate(records);
-  const dataByMethod = aggregateByMethod(records);
 
   return (
     <div style={{ padding: "32px" }}>
       <h2>Donation Records</h2>
-      {loading ? (
+      {/* {loading ? (
         <div>Loading...</div>
-      ) : (
+      ) : ( */}
         <>
           {/* Rich Data Summary */}
           {/* Summary Cards */}
@@ -161,8 +151,8 @@ const DonationRecord: React.FC = () => {
             }}>
               <div style={{ fontWeight: 600, color: "#1976d2" }}>Top Donor</div>
               <div style={{ fontSize: "1.1rem", marginTop: 4 }}>
-                {records.length > 0
-                  ? records.reduce((a, b) => (a.amount > b.amount ? a : b)).donorName
+                {filteredDonation.length > 0
+                  ? filteredDonation.reduce((a, b) => (a.amount > b.amount ? a : b)).name
                   : "-"}
               </div>
             </div>
@@ -175,8 +165,8 @@ const DonationRecord: React.FC = () => {
             }}>
               <div style={{ fontWeight: 600, color: "#f57c00" }}>Largest Donation</div>
               <div style={{ fontSize: "1.1rem", marginTop: 4 }}>
-                {records.length > 0
-                  ? `$${records.reduce((a, b) => (a.amount > b.amount ? a : b)).amount}`
+                {filteredDonation.length > 0
+                  ? `$${filteredDonation.reduce((a, b) => (a.amount > b.amount ? a : b)).amount}`
                   : "-"}
               </div>
             </div>
@@ -252,15 +242,15 @@ const DonationRecord: React.FC = () => {
                     Date
                   </th>
                   <th style={{ border: "1px solid #ddd", padding: "8px" }}>
-                    Method
+                    Message
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {records.map((rec) => (
-                  <tr key={rec.id}>
+                {filteredDonation.map((rec) => (
+                  <tr key={rec.user_id}>
                     <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {rec.donorName}
+                      {rec.name}
                     </td>
                     <td style={{ border: "1px solid #ddd", padding: "8px" }}>
                       ${rec.amount}
@@ -269,15 +259,16 @@ const DonationRecord: React.FC = () => {
                       {rec.date}
                     </td>
                     <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                      {rec.method}
+                      {rec.message}
                     </td>
+                    
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </>
-      )}
+      {/* )} */}
     </div>
   );
 };
